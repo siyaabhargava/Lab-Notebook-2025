@@ -11,7 +11,7 @@ gs://fc-secure-9ef0fe1d-de50-42d5-8e85-9c37d92c946f/data/EM_202.2_immune_results
 
 Available reference database flags for immune cell types from OneK1K dataset:
 *--ref CD14-low_CD16-positive_monocyte --cell_type immunemv 
---ref CD14-positive_monocyte --cell_type immune
+*--ref CD14-positive_monocyte --cell_type immune
 --ref CD16-negative_CD56-bright_natural_killer_cell_human --cell_type immune
 --ref CD4-positive_alpha-beta_cytotoxic_T_cell --cell_type immune
 --ref CD4-positive_alpha-beta_T_cell --cell_type immune
