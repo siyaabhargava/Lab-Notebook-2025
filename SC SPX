@@ -1,0 +1,154 @@
+#SC SPX
+git clone https://github.com/ckrueger2/aou_sc_predixcan
+# cloning aou_sc_predixcan into terminal
+chmod +x ~/aou_sc_predixcan/00wrapper.sh
+
+bash ~/aou_sc_predixcan/00wrapper.sh --phecode <PHECODE> --pop <POP> --ref <REF> --cell_type <TYPE>
+bash ~/aou_sc_predixcan/00wrapper.sh --phecode EM_202.2 --pop META --ref CD16-negative_CD56-bright_natural_killer_cell_human --cell_type immune
+
+gsutil ls
+# bucket name
+gs://fc-secure-9ef0fe1d-de50-42d5-8e85-9c37d92c946f/
+
+#  jupyter@all-of-us-27034-m:~$ gcloud config get-value project
+# terra-vpc-sc-0cb4f4f4
+
+!!! /home/wheelerlab3/Data/predictdb_models/scPrediXcan_models/l-ctPred_models_for_islet_cell_types_from_T2D_dataset/ is correct one.. different on the github with Claudia's instructions
+
+bash ~/aou_sc_predixcan/00wrapper.sh --phecode EM_202.2 --pop META --ref CD14-low_CD16-positive_monocyte --cell_type immune
+
+# dif immune cells - ** means SPX done
+**--ref CD14-low_CD16-positive_monocyte --cell_type immune
+2) --ref CD14-positive_monocyte --cell_type immune
+3) --ref CD16-negative_CD56-bright_natural_killer_cell_human --cell_type immune4) 
+4) --ref CD4-positive_alpha-beta_cytotoxic_T_cell --cell_type immune
+5) --ref CD4-positive_alpha-beta_T_cell --cell_type immune
+6) --ref CD8-positive_alpha-beta_T_cell --cell_type immune
+7) --ref central_memory_CD4-positive_alpha-beta_T_cell --cell_type immune
+8) --ref central_memory_CD8-positive_alpha-beta_T_cell --cell_type immune
+9) --ref conventional_dendritic_cell --cell_type immune
+10) --ref dendritic_cell --cell_type immune
+11) --ref double_negative_thymocyte --cell_type immune
+12) --ref effector_memory_CD4-positive_alpha-beta_T_cell --cell_type immune
+13) --ref effector_memory_CD8-positive_alpha-beta_T_cell --cell_type immune
+14) --ref erythrocyte --cell_type immune
+15) --ref gamma-delta_T_cell --cell_type immune
+16) --ref hematopoietic_precursor_cell --cell_type immune
+17) --ref innate_lymphoid_cell --cell_type immune
+18) --ref memory_B_cell --cell_type immune
+19) --ref mucosal_invariant_T_cell --cell_type immune
+20) --ref naive_thymus-derived_CD4-positive_alpha-beta_T_cell --cell_type immune
+21) --ref naive_thymus-derived_CD8-positive_alpha-beta_T_cell --cell_type immune
+22) --ref natural_killer_cell --cell_type immune
+23) --ref peripheral_blood_mononuclear_cell --cell_type immune
+24) --ref plasmablast --cell_type immune
+25) --ref plasmacytoid_dendritic_cell --cell_type immune
+26) --ref platelet --cell_type immune
+27) --ref regulatory_T_cell --cell_type immune
+28) --ref transitional_stage_B_cell --cell_type immune
+
+
+
+
+when running spx for first time:
+Running S-PrediXcan...
+WARNING - Missing --gwas_h2 and --gwas_N are required to calibrate the pvalue and zscore.
+INFO - Processing GWAS command line parameters
+INFO - Building beta for /tmp/META_formatted_sc_immune_EM_202.2.tsv and l-ctPred_models/CD14-low_CD16-positive_monocyte.db
+INFO - Reading input gwas with special handling: /tmp/META_formatted_sc_immune_EM_202.2.tsv
+INFO - Processing input gwas
+INFO - Calculating zscore from se and beta
+INFO - Aligning GWAS to models
+INFO - Trimming output
+INFO - Successfully parsed input gwas in 26.75107821199981 seconds
+INFO - Started metaxcan process
+INFO - Loading model from: l-ctPred_models/CD14-low_CD16-positive_monocyte.db
+INFO - Loading covariance data from: l-ctPred_models/CD14-low_CD16-positive_monocyte_covariances.txt.gz
+
+#warning .. is this important??
+
+
+INFO - 94 % of model's snps used
+WARNING - IMPORTANT: The pvalue and zscore are uncalibrated for inflation
+INFO - Sucessfully processed metaxcan association in 2069.4950961840004 seconds
+Uploading results: gsutil cp /home/jupyter/META_predixcan_output_EM_202.2_immune_cell_CD14-low_CD16-positive_monocyte.csv gs://fc-secure-9ef0fe1d-de50-42d5-8e85-9c37d92c946f/data/
+Copying file:///home/jupyter/META_predixcan_output_EM_202.2_immune_cell_CD14-low_CD16-positive_monocyte.csv [Content-Type=text/csv]...
+/ [1 files][  2.5 MiB/  2.5 MiB]
+Operation completed over 1 objects/2.5 MiB.
+
+# where immune results for EM_202.2 and _____ are stored
+jupyter@all-of-us-27034-m:~$ gsutil mv \
+  gs://fc-secure-9ef0fe1d-de50-42d5-8e85-9c37d92c946f/data/META_predixcan_output_EM_202.2_immune_cell_CD14-low_CD16-positive_monocyte.csv \
+  gs://fc-secure-9ef0fe1d-de50-42d5-8e85-9c37d92c946f/data/immune_results/
+Copying gs://fc-secure-9ef0fe1d-de50-42d5-8e85-9c37d92c946f/data/META_predixcan_output_EM_202.2_immune_cell_CD14-low_CD16-positive_monocyte.csv [Content-Type=text/csv]...
+Removing gs://fc-secure-9ef0fe1d-de50-42d5-8e85-9c37d92c946f/data/META_predixcan_output_EM_202.2_immune_cell_CD14-low_CD16-positive_monocyte.csv...
+
+Operation completed over 1 objects/2.5 MiB.
+jupyter@all-of-us-27034-m:~$ gsutil ls gs://fc-secure-9ef0fe1d-de50-42d5-8e85-9c37d92c946f/data/immune_results/
+gs://fc-secure-9ef0fe1d-de50-42d5-8e85-9c37d92c946f/data/immune_results/META_predixcan_output_EM_202.2_immune_cell_CD14-low_CD16-positive_monocyte.csv
+
+
+# continue with SPX
+python ~/aou_sc_predixcan/03run_predixcan.py --phecode <PHECODE> --pop <POP> --ref <REF> --cell_type <TYPE>
+**2) python ~/aou_sc_predixcan/03run_predixcan.py --phecode EM_202.2 --pop META --ref CD14-positive_monocyte --cell_type immune
+3) python ~/aou_sc_predixcan/03run_predixcan.py --phecode EM_202.2 --pop META --ref CD16-negative_CD56-bright_natural_killer_cell_human --cell_type immune
+4) python ~/aou_sc_predixcan/03run_predixcan.py --phecode EM_202.2 --pop META --ref CD4-positive_alpha-beta_cytotoxic_T_cell --cell_type immune
+5) python ~/aou_sc_predixcan/03run_predixcan.py --phecode EM_202.2 --pop META --ref CD4-positive_alpha-beta_T_cell --cell_type immune
+6) python ~/aou_sc_predixcan/03run_predixcan.py --phecode EM_202.2 --pop META --ref CD8-positive_alpha-beta_T_cell --cell_type immune
+7) python ~/aou_sc_predixcan/03run_predixcan.py --phecode EM_202.2 --pop META --ref central_memory_CD4-positive_alpha-beta_T_cell --cell_type immune
+8) python ~/aou_sc_predixcan/03run_predixcan.py --phecode EM_202.2 --pop META --ref central_memory_CD8-positive_alpha-beta_T_cell --cell_type immune
+9) python ~/aou_sc_predixcan/03run_predixcan.py --phecode EM_202.2 --pop META --ref conventional_dendritic_cell --cell_type immune
+10) python ~/aou_sc_predixcan/03run_predixcan.py --phecode EM_202.2 --pop META --ref dendritic_cell --cell_type immune
+11) python ~/aou_sc_predixcan/03run_predixcan.py --phecode EM_202.2 --pop META --ref double_negative_thymocyte --cell_type immune
+12) python ~/aou_sc_predixcan/03run_predixcan.py --phecode EM_202.2 --pop META --ref effector_memory_CD4-positive_alpha-beta_T_cell --cell_type immune
+13) python ~/aou_sc_predixcan/03run_predixcan.py --phecode EM_202.2 --pop META --ref effector_memory_CD8-positive_alpha-beta_T_cell --cell_type immune
+14) python ~/aou_sc_predixcan/03run_predixcan.py --phecode EM_202.2 --pop META --ref erythrocyte --cell_type immune
+15) python ~/aou_sc_predixcan/03run_predixcan.py --phecode EM_202.2 --pop META --ref gamma-delta_T_cell --cell_type immune
+16) python ~/aou_sc_predixcan/03run_predixcan.py --phecode EM_202.2 --pop META --ref hematopoietic_precursor_cell --cell_type immune
+17) python ~/aou_sc_predixcan/03run_predixcan.py --phecode EM_202.2 --pop META --ref innate_lymphoid_cell --cell_type immune
+18) python ~/aou_sc_predixcan/03run_predixcan.py --phecode EM_202.2 --pop META --ref memory_B_cell --cell_type immune
+19) python ~/aou_sc_predixcan/03run_predixcan.py --phecode EM_202.2 --pop META --ref mucosal_invariant_T_cell --cell_type immune
+20) python ~/aou_sc_predixcan/03run_predixcan.py --phecode EM_202.2 --pop META --ref naive_thymus-derived_CD4-positive_alpha-beta_T_cell --cell_type immune
+21) python ~/aou_sc_predixcan/03run_predixcan.py --phecode EM_202.2 --pop META --ref naive_thymus-derived_CD8-positive_alpha-beta_T_cell --cell_type immune
+22) python ~/aou_sc_predixcan/03run_predixcan.py --phecode EM_202.2 --pop META --ref natural_killer_cell --cell_type immune
+23) python ~/aou_sc_predixcan/03run_predixcan.py --phecode EM_202.2 --pop META --ref peripheral_blood_mononuclear_cell --cell_type immune
+24) python ~/aou_sc_predixcan/03run_predixcan.py --phecode EM_202.2 --pop META --ref plasmablast --cell_type immune
+25) python ~/aou_sc_predixcan/03run_predixcan.py --phecode EM_202.2 --pop META --ref plasmacytoid_dendritic_cell --cell_type immune
+26) python ~/aou_sc_predixcan/03run_predixcan.py --phecode EM_202.2 --pop META --ref platelet --cell_type immune
+27) python ~/aou_sc_predixcan/03run_predixcan.py --phecode EM_202.2 --pop META --ref regulatory_T_cell --cell_type immune
+28) python ~/aou_sc_predixcan/03run_predixcan.py --phecode EM_202.2 --pop META --ref transitional_stage_B_cell --cell_type immune
+
+python -m pip install --user pandas
+python -m pip install --user pandas numpy scipy statsmodels h5py pyarrow tqdm click requests
+
+
+#wtf
+WARNING - Missing --gwas_h2 and --gwas_N are required to calibrate the pvalue and zscore.
+INFO - Processing GWAS command line parameters
+Traceback (most recent call last):
+  File "/home/jupyter/MetaXcan/software/SPrediXcan.py", line 69, in <module>
+    run(args)
+    ~~~^^^^^^
+  File "/home/jupyter/MetaXcan/software/SPrediXcan.py", line 29, in run
+    g = M03_betas.run(M03_args)
+  File "/home/jupyter/MetaXcan/software/M03_betas.py", line 103, in run
+    model = PredictionModel.load_model(args.model_db_path, args.model_db_snp_key) if args.model_db_path else None
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/jupyter/MetaXcan/software/metax/PredictionModel.py", line 141, in load_model
+    weights, extra = db.load_weights(), db.load_extra()
+                     ~~~~~~~~~~~~~~~^^
+  File "/home/jupyter/MetaXcan/software/metax/PredictionModel.py", line 76, in load_weights
+    self.openDBIfNecessary()
+    ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/jupyter/MetaXcan/software/metax/PredictionModel.py", line 65, in openDBIfNecessary
+    raise Exceptions.BadFilename(self.file_name)
+metax.Exceptions.BadFilename: l-ctPred_models/CD16-negative_CD56-bright_natural_killer_cell_human.db
+ERROR: SPrediXcan.py failed with exit code 256
+
+
+
+metax.Exceptions.BadFilename: l-ctPred_models/CD16-negative_CD56-bright_natural_killer_cell_human.db
+ERROR: SPrediXcan.py failed with exit code 256
+
+
+conda activate imlabtools
