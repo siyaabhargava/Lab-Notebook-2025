@@ -1,9 +1,9 @@
-bash ~/aou_sc_predixcan/00wrapper.sh --phecode EM_202.2 --pop META --ref CD14-low_CD16-positive_monocyte --cell_type immune
+bash ~/aou_sc_predixcan/00wrapper.sh --phecode EM_202.2 --pop META --ref effector_memory_CD4-positive_alpha-beta_T_cell --cell_type immune
 
 
 
 python ~/aou_sc_predixcan/03run_predixcan.py --phecode <PHECODE> --pop <POP> --ref <REF> --cell_type <TYPE>
-python ~/aou_sc_predixcan/03run_predixcan.py --phecode EM_202.2 --pop META --ref double_negative_thymocyte --cell_type immune
+python ~/aou_sc_predixcan/03run_predixcan.py --phecode EM_202.2 --pop META --ref gamma-delta_T_cell --cell_type immune
 
 jupyter@all-of-us-27034-m:~$ gsutil mv gs://fc-secure-9ef0fe1d-de50-42d5-8e85-9c37d92c946f/data/META_predixcan_output_EM_202.2_immune_cell_CD14-low_CD16-positive_monocyte.csv 
 gs://fc-secure-9ef0fe1d-de50-42d5-8e85-9c37d92c946f/data/EM_202.2_immune_results/
@@ -29,25 +29,27 @@ accidentally saved all first 3 files .csv as one singluar object instead of movi
 
 Available reference database flags for immune cell types from OneK1K dataset:
 
+all in spreadsheet: 
 *--ref CD14-low_CD16-positive_monocyte --cell_type immune
 *--ref CD14-positive_monocyte --cell_type immune -->>>> not in bucket
 *--ref CD16-negative_CD56-bright_natural_killer_cell_human --cell_type immune -->>>>> not in bucket
 *--ref CD4-positive_alpha-beta_cytotoxic_T_cell --cell_type immune
 *--ref CD4-positive_alpha-beta_T_cell --cell_type immune
 *--ref CD8-positive_alpha-beta_T_cell --cell_type immune
-download:
-
-
 *--ref central_memory_CD4-positive_alpha-beta_T_cell --cell_type immune
 *--ref central_memory_CD8-positive_alpha-beta_T_cell --cell_type immune
 *--ref conventional_dendritic_cell --cell_type immune
 *--ref dendritic_cell --cell_type immune
 *--ref double_negative_thymocyte --cell_type immune
 
---ref effector_memory_CD4-positive_alpha-beta_T_cell --cell_type immune
---ref effector_memory_CD8-positive_alpha-beta_T_cell --cell_type immune
---ref erythrocyte --cell_type immune
---ref gamma-delta_T_cell --cell_type immune
+download:
+
+*--ref effector_memory_CD4-positive_alpha-beta_T_cell --cell_type immune
+*--ref effector_memory_CD8-positive_alpha-beta_T_cell --cell_type immune
+*--ref erythrocyte --cell_type immune
+*--ref gamma-delta_T_cell --cell_type immune
+
+still to run:
 --ref hematopoietic_precursor_cell --cell_type immune
 --ref innate_lymphoid_cell --cell_type immune
 --ref memory_B_cell --cell_type immune
