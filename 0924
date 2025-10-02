@@ -3,7 +3,7 @@ bash ~/aou_sc_predixcan/00wrapper.sh --phecode EM_202.2 --pop META --ref effecto
 
 
 python ~/aou_sc_predixcan/03run_predixcan.py --phecode <PHECODE> --pop <POP> --ref <REF> --cell_type <TYPE>
-python ~/aou_sc_predixcan/03run_predixcan.py --phecode EM_202.2 --pop META --ref gamma-delta_T_cell --cell_type immune
+python ~/aou_sc_predixcan/03run_predixcan.py --phecode EM_202.2 --pop META --ref naive_thymus-derived_CD8-positive_alpha-beta_T_cell --cell_type immune
 
 jupyter@all-of-us-27034-m:~$ gsutil mv gs://fc-secure-9ef0fe1d-de50-42d5-8e85-9c37d92c946f/data/META_predixcan_output_EM_202.2_immune_cell_CD14-low_CD16-positive_monocyte.csv 
 gs://fc-secure-9ef0fe1d-de50-42d5-8e85-9c37d92c946f/data/EM_202.2_immune_results/
@@ -42,19 +42,21 @@ all in spreadsheet:
 *--ref dendritic_cell --cell_type immune
 *--ref double_negative_thymocyte --cell_type immune
 
-download:
+downloaded:
 
 *--ref effector_memory_CD4-positive_alpha-beta_T_cell --cell_type immune
 *--ref effector_memory_CD8-positive_alpha-beta_T_cell --cell_type immune
 *--ref erythrocyte --cell_type immune
 *--ref gamma-delta_T_cell --cell_type immune
 
+download:
+*--ref hematopoietic_precursor_cell --cell_type immune
+*--ref innate_lymphoid_cell --cell_type immune
+*--ref memory_B_cell --cell_type immune
+*--ref mucosal_invariant_T_cell --cell_type immune
+*--ref naive_thymus-derived_CD4-positive_alpha-beta_T_cell --cell_type immune
+
 still to run:
---ref hematopoietic_precursor_cell --cell_type immune
---ref innate_lymphoid_cell --cell_type immune
---ref memory_B_cell --cell_type immune
---ref mucosal_invariant_T_cell --cell_type immune
---ref naive_thymus-derived_CD4-positive_alpha-beta_T_cell --cell_type immune
 --ref naive_thymus-derived_CD8-positive_alpha-beta_T_cell --cell_type immune
 --ref natural_killer_cell --cell_type immune
 --ref peripheral_blood_mononuclear_cell --cell_type immune
@@ -76,3 +78,9 @@ Available reference database flags for islet cell types from T2D dataset:
 --ref Gamma --cell_type islet
 --ref Immune --cell_type islet
 --ref Quiescent_stellate --cell_type islet
+
+
+pandas module not found
+
+/home/jupyter/miniconda3/bin/python -m pip install --upgrade pip
+/home/jupyter/miniconda3/bin/python -m pip install numpy scipy pandas statsmodels h5py cython
