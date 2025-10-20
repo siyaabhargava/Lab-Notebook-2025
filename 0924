@@ -1,8 +1,8 @@
-bash ~/aou_sc_predixcan/00wrapper.sh --phecode EM_202.2 --pop META --ref Acinar --cell_type islet
+bash ~/aou_sc_predixcan/00wrapper.sh --phecode EM_202.2 --pop META --ref natural_killer_cell --cell_type immune
 
 
 python ~/aou_sc_predixcan/03run_predixcan.py --phecode <PHECODE> --pop <POP> --ref <REF> --cell_type <TYPE>
-python ~/aou_sc_predixcan/03run_predixcan.py --phecode EM_202.2 --pop META --ref Activated_stellate --cell_type islet
+python ~/aou_sc_predixcan/03run_predixcan.py --phecode EM_202.2 --pop META --ref transitional_stage_B_cell --cell_type immune
 
 jupyter@all-of-us-27034-m:~$ gsutil mv gs://fc-secure-9ef0fe1d-de50-42d5-8e85-9c37d92c946f/data/META_predixcan_output_EM_202.2_immune_cell_CD14-low_CD16-positive_monocyte.csv 
 gs://fc-secure-9ef0fe1d-de50-42d5-8e85-9c37d92c946f/data/EM_202.2_immune_results/
@@ -58,13 +58,13 @@ downloaded:
 download:
 
 still to run:
---ref natural_killer_cell --cell_type immune
---ref peripheral_blood_mononuclear_cell --cell_type immune
---ref plasmablast --cell_type immune
---ref plasmacytoid_dendritic_cell --cell_type immune
---ref platelet --cell_type immune
---ref regulatory_T_cell --cell_type immune
---ref transitional_stage_B_cell --cell_type immune
+*--ref natural_killer_cell --cell_type immune
+*--ref peripheral_blood_mononuclear_cell --cell_type immune
+*--ref plasmablast --cell_type immune
+*--ref plasmacytoid_dendritic_cell --cell_type immune
+*--ref platelet --cell_type immune
+*--ref regulatory_T_cell --cell_type immune
+*--ref transitional_stage_B_cell --cell_type immune
 
 
 
@@ -79,15 +79,15 @@ in spreadsheet:
 
 Running:
 *--ref Delta --cell_type islet
+*--ref Ductal --cell_type islet
 
---ref Ductal --cell_type islet
---ref Endothelial --cell_type islet
+*--ref Endothelial --cell_type islet
 --ref Epsilon --cell_type islet
 --ref Gamma --cell_type islet
 --ref Immune --cell_type islet
 --ref Quiescent_stellate --cell_type islet
 
-python ~/aou_sc_predixcan/03run_predixcan.py --phecode EM_202.2 --pop META --ref Ductal --cell_type islet
+python ~/aou_sc_predixcan/03run_predixcan.py --phecode EM_202.2 --pop META --ref Endothelial --cell_type islet
 
 pandas module not found
 
