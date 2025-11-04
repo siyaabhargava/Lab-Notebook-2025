@@ -1,0 +1,34 @@
+head -n 1 /home/siyaa/All_Metal_LDSC-CORR_Neff.v2.txt
+#shows the first few lines of the file
+
+#SPX on server!!
+
+#inorder to move a file you  downlaoded to the lab server:
+ls ~/Downloads #ensure file is on computer
+
+(base) siyaabhargava@Siyaas-MacBook-Air ~ % scp ~/Downloads/All_Metal_LDSC-CORR_Neff.v2.txt siyaa@10.22.9.205:/home/siyaa/
+#specify the path to the file. do this from -zsh, not lab server. will copy over
+
+ssh siyaa@10.22.9.205
+password
+
+nano
+#u can change the headers to match the file that you are reading in
+#Short version: your column mappings don’t match your file’s headers, so the parser isn’t getting clean allele strings.
+Option	When to use	In your case
+--insert_value sample_size	if GWAS file has no sample size column	❌ remove
+--insert_value n_cases	if GWAS file has no case count column	❌ remove
+-output_column_map Neff sample_size	when file includes per-SNP Neff	✅ use
+-output_column_map Ncases n_cases	when file includes Ncases	✅ use
+
+#The PrediXcan/S-PrediXcan pipeline (through gwas_parsing.py and the imputation steps) only needs the following GWAS columns for each variant:
+Required	Purpose
+chromosome, position, effect_allele, non_effect_allele	variant identity
+beta (or effect_size)	regression effect
+se (standard error)	precision of effect
+pvalue	significance
+sample_size	total sample size or effective sample size
+n_cases	only required for binary traits (like T2D)
+
+./run_SPx.sh
+
