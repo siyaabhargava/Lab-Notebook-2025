@@ -32,3 +32,118 @@ n_cases	only required for binary traits (like T2D)
 
 ./run_SPx.sh
 
+
+ zcat /home/siyaa/All_Metal_LDSC-CORR_Neff.v2.tsv.gz | head -1 | tr '\t' '\n' | nl
+     1	variant_id
+     2	panel_variant_id
+     3	chromosome
+     4	position
+     5	effect_allele
+     6	non_effect_allele
+     7	frequency
+     8	pvalue
+     9	zscore
+    10	effect_size
+    11	standard_error
+    12	sample_size
+    13	n_cases
+(base) siyaa@pop-os:~$ 
+(base) siyaa@pop-os:~$ # show first 5 values of both columns
+(base) siyaa@pop-os:~$ zcat /home/siyaa/All_Metal_LDSC-CORR_Neff.v2.tsv.gz | awk 'NR==1{for(i=1;i<=NF;i++){h[$i]=i}} NR>1{print $h["variant_id"], $h["panel_variant_id"]; exit}'
+NA chr1_55330_G_A_b38
+#variant id = NA
+(base) siyaa@pop-os:~$ zcat /home/siyaa/All_Metal_LDSC-CORR_Neff.v2.tsv.gz | awk 'NR==1{for(i=1;i<=NF;i++){h[$i]=i}} NR>1 && NR<=6{print $h["panel_variant_id"]}'
+chr1_55330_G_A_b38
+chr1_55416_G_A_b38
+chr1_62157_G_A_b38
+chr1_83771_T_G_b38 
+chr1_85892_A_G_b38
+#panel variant id has the right values
+(GTEx v8 varID format)
+#The earlier “0% of model’s snps used” almost certainly happened because the wrong SNP column/key pairing was used at run time.
+(base) siyaa@pop-os:~$ 
+
+
+
+sqlite3 /home/wheelerlab3/Data/predictdb_models/mashr/mashr_Adipose_Subcutaneous.db \
+> "SELECT varID FROM snps LIMIT 5;"
+Error: no such table: snps
+
+#When sqlite3 says no such table: snps, it means your .db file doesn’t use the standard schema (like GTEx v8 PredictDB models that have a snps table). Instead, it might use an older or custom key structure — for example, some mashr or GTEx-derived models store variant information in different tables (variants, weights, extra, etc.) or they simply don’t store a varID column at all.
+That’s why your run gave:
+INFO - 0 % of model's snps used
+— S-PrediXcan was looking for varID in a table that doesn’t exist.
+
+Great — your model DB shows only two tables: weights and extra. 
+That’s normal for some PredictDB releases. We just have to see which SNP key the weights table uses so we can match your GWAS.
+
+#Look for a SNP ID column name in weights, typically varID or rsid (sometimes snp, snp_id, etc.).
+(base) siyaa@pop-os:~$ sqlite3 /home/wheelerlab3/Data/predictdb_models/mashr/mashr_Adipose_Subcutaneous.db \
+> "SELECT * FROM weights LIMIT 3;"
+ENSG00000169583.12|rs908836|chr9_136996001_G_A_b38|G|A|-0.198884034564251
+ENSG00000180549.7|rs10732706|chr9_137032508_C_T_b38|C|T|-0.205630464773753
+ENSG00000180549.7|rs4880192|chr9_137032610_A_G_b38|A|G|-0.138400426073106
+
+weights row format (in order):
+gene_id | rsid | varID | ref | alt | weight
+#this is how the model is formatted
+
+
+
+
+
+# A) Dump ALL varIDs from the model (takes a few seconds)
+sqlite3 /home/wheelerlab3/Data/predictdb_models/mashr/mashr_Adipose_Subcutaneous.db \
+"SELECT DISTINCT varID FROM weights;" > /tmp/model.varIDs.txt
+
+# B) Dump ALL panel_variant_id from your GWAS
+zcat /home/siyaa/All_Metal_LDSC-CORR_Neff.v2.tsv.gz \
+| awk 'BEGIN{FS=OFS="\t"} NR==1{for(i=1;i<=NF;i++) if($i=="panel_variant_id") c=i; next} {print $c}' \
+> /tmp/gwas.varIDs.txt
+
+# C) Count how many intersect
+grep -F -f /tmp/model.varIDs.txt /tmp/gwas.varIDs.txt | head
+grep -F -f /tmp/model.varIDs.txt /tmp/gwas.varIDs.txt | wc -l
+
+result
+(base) siyaa@pop-os:~$ # A) Dump ALL varIDs from the model (takes a few seconds)
+(base) siyaa@pop-os:~$ sqlite3 /home/wheelerlab3/Data/predictdb_models/mashr/mashr_Adipose_Subcutaneous.db \
+> "SELECT DISTINCT varID FROM weights;" > /tmp/model.varIDs.txt
+(base) siyaa@pop-os:~$ 
+(base) siyaa@pop-os:~$ # B) Dump ALL panel_variant_id from your GWAS
+(base) siyaa@pop-os:~$ zcat /home/siyaa/All_Metal_LDSC-CORR_Neff.v2.tsv.gz \
+> | awk 'BEGIN{FS=OFS="\t"} NR==1{for(i=1;i<=NF;i++) if($i=="panel_variant_id") c=i; next} {print $c}' \
+> > /tmp/gwas.varIDs.txt
+(base) siyaa@pop-os:~$ 
+(base) siyaa@pop-os:~$ # C) Count how many intersect
+(base) siyaa@pop-os:~$ grep -F -f /tmp/model.varIDs.txt /tmp/gwas.varIDs.txt | head
+chr1_959193_G_A_b38
+chr1_31407531_C_T_b38
+chr1_79006491_C_T_b38
+chr1_95164465_C_T_b38
+chr1_218285209_T_C_b38
+chr1_230095509_C_T_b38
+chr2_47011_T_C_b38
+chr2_242793_G_C_b38
+chr2_264019_C_A_b38
+chr2_264227_G_A_b38
+(base) siyaa@pop-os:~$ grep -F -f /tmp/model.varIDs.txt /tmp/gwas.varIDs.txt | wc -l
+262
+(base) siyaa@pop-os:~$ 
+
+
+
+(base) siyaa@pop-os:~$ zcat /home/siyaa/All_Metal_LDSC-CORR_Neff.v2.tsv.gz | wc -l
+208208
+
+far too small — only a few hundred thousand variants versus the tens of millions used in the model. That means only ~200–300 SNPs overlapped (which you saw from the grep test).
+The mashr model for each tissue expects millions of common variants (those used in GTEx v8, typically ~10M).
+Your 208 K-row GWAS covers < 1 % of them. Even though a few overlap, that’s rounded down to “0 % of model’s snps used.”
+S-PrediXcan can technically run, but with so little coverage, no genes will have reliable prediction scores — you’ll get mostly missing or null results.
+
+
+line num : (base) siyaa@pop-os:~$ wc -l /home/siyaa/All_Metal_LDSC-CORR_Neff.v2.txt
+
+19821464 /home/siyaa/All_Metal_LDSC-CORR_Neff.v2.txt
+
+#raw file is huge. So the ~208k after parsing means the reference metadata you used filtered out ~99% of variants.
