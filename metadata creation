@@ -1,0 +1,203 @@
+🧬 Reference Metadata in S-PrediXcan
+What is Reference Metadata?
+
+A reference metadata file is a standardized list of all SNPs (variants) known to an expression prediction model (like GTEx or mashr).
+It acts as a dictionary that links your GWAS SNPs to the variants used by the model.
+
+Purpose
+
+Ensures that GWAS and model variants refer to the same physical SNPs
+
+Converts variant IDs into a consistent format (e.g., rs12345 → chr1_12345_A_G_b38)
+
+Filters out SNPs that aren’t part of the expression model
+
+Allows PrediXcan/S-PrediXcan to correctly align GWAS data with model SNPs
+
+⚠️ Without the correct metadata, S-PrediXcan can’t align the datasets and may drop >90 % of variants (→ “0 % of model’s SNPs used”).
+
+🧩 How to Inspect Metadata from a Model
+
+Every mashr or PrediXcan model (.db) contains a table called weights.
+You can check its structure using:
+
+sqlite3 /path/to/mashr_model.db ".tables"
+sqlite3 /path/to/mashr_model.db "SELECT * FROM weights LIMIT 5;"
+
+
+Example output:
+
+ENSG00000169583.12|rs908836|chr9_136996001_G_A_b38|G|A|-0.19888
+
+
+Here:
+
+chr9_136996001_G_A_b38 → the variant ID format your model expects
+
+It includes: chromosome, position, reference allele, effect allele, and build (b38)
+
+🧾 How to Create a Reference Metadata File
+
+This makes a .txt.gz file listing every variant (SNP) used in your model.
+You can reuse it for any GWAS analyzed with the same model.
+
+sqlite3 /path/to/mashr_model.db \
+"SELECT DISTINCT varID FROM weights;" \
+| awk 'BEGIN{print "panel_variant_id"} {print}' \
+| gzip > /path/to/mashr_variant_metadata.txt.gz
+
+🔍 How to Check GWAS–Model Compatibility
+Preview a few variant IDs from your GWAS:
+zcat your_gwas.tsv.gz | awk 'NR==1{for(i=1;i<=NF;i++){if($i=="panel_variant_id") c=i} } NR>1 && NR<=6{print $c}'
+
+Preview a few from your model:
+sqlite3 /path/to/mashr_model.db "SELECT DISTINCT varID FROM weights LIMIT 5;"
+
+
+✅ If they look similar (e.g., both chr1_55330_G_A_b38 style), your metadata aligns correctly.
+
+⚙️ Handy Commands Summary
+Purpose	Command
+View model tables	sqlite3 model.db ".tables"
+View first few SNPs	sqlite3 model.db "SELECT * FROM weights LIMIT 5;"
+Create metadata file	(see command above)
+Count overlap between GWAS & model	`grep -F -f model.varIDs.txt gwas.varIDs.txt
+🧠 Key Takeaway
+
+Always use reference metadata built from your model.
+It guarantees that your GWAS SNPs and model SNPs are speaking the same language — ensuring accurate S-PrediXcan results.
+
+------
+
+Example Workflow: GWAS → Metadata → S-PrediXcan
+1️⃣ Inspect the model to see its SNP format
+sqlite3 /home/wheelerlab3/Data/predictdb_models/mashr/mashr_Adipose_Subcutaneous.db "SELECT * FROM weights LIMIT 5;"
+
+ENSG00000169583.12|rs908836|chr9_136996001_G_A_b38|G|A|-0.198884034564251
+ENSG00000180549.7|rs10732706|chr9_137032508_C_T_b38|C|T|-0.205630464773753
+ENSG00000180549.7|rs4880192|chr9_137032610_A_G_b38|A|G|-0.138400426073106
+ENSG00000180549.7|rs12551220|chr9_137032730_G_A_b38|G|A|0.27211794245036
+ENSG00000107281.9|rs3829107|chr9_137044229_A_G_b38|A|G|-0.0632124584081376
+(base) siyaa@pop-os:~$ 
+
+
+
+✅ Check that the SNPs look like chr1_55330_G_A_b38 — this is the ID format your GWAS needs to match.
+
+2️⃣ Build reference metadata directly from the model
+sqlite3 /home/wheelerlab3/Data/predictdb_models/mashr/mashr_Adipose_Subcutaneous.db \
+"SELECT DISTINCT varID FROM weights;" \
+| awk 'BEGIN{print "panel_variant_id"} {print}' \
+| gzip > /home/siyaa/mashr_Adipose.panel_variant_metadata.txt.gz
+
+#This file (mashr_Adipose.panel_variant_metadata.txt.gz) lists all SNPs the model knows.
+#You can reuse it for any GWAS run using this same model.
+
+#(base) siyaa@pop-os:~$ zcat /home/siyaa/mashr_Adipose.panel_variant_metadata.txt.gz | head
+panel_variant_id
+chr9_136996001_G_A_b38
+chr9_137032508_C_T_b38
+chr9_137032610_A_G_b38
+chr9_137032730_G_A_b38
+chr9_137044229_A_G_b38
+chr9_137045741_C_G_b38
+chr9_137054225_G_A_b38
+chr9_137074360_G_A_b38
+chr9_137109447_C_T_b38
+(base) siyaa@pop-os:~$ 
+
+
+3️⃣ Convert the GWAS for S-PrediXcan
+/usr/bin/python /home/wheelerlab3/summary-gwas-imputation/src/gwas_parsing.py \
+  -gwas_file /home/siyaa/All_Metal_LDSC-CORR_Neff.v2.txt \
+  -snp_reference_metadata /home/siyaa/mashr_Adipose.panel_variant_metadata.txt.gz METADATA \
+  -output_column_map Chromsome chromosome \
+  -output_column_map Position position \
+  -output_column_map EffectAllele effect_allele \
+  -output_column_map NonEffectAllele non_effect_allele \
+  -output_column_map Beta effect_size \
+  -output_column_map SE standard_error \
+  -output_column_map EAF frequency \
+  -output_column_map PvalAssociation pvalue \
+  -output_column_map Neff sample_size \
+  -output_column_map Ncases n_cases \
+  -output_order variant_id panel_variant_id chromosome position effect_allele non_effect_allele frequency pvalue zscore effect_size standard_error sample_size n_cases \
+  -output /home/siyaa/All_Metal_LDSC-CORR_Neff.v2.forSPx.tsv.gz
+
+
+✔️ This step creates a formatted GWAS file compatible with your model.
+
+
+
+“A tab delimited file with one row per SNV including the following columns: chromosome and position; effect allele and other allele; 
+MR-MEGA association P-value; MR-MEGA ancestry-correlated heterogeneity P-value; MR-MEGA residual heterogeneity P-value; 
+fixed-effects meta-analysis beta (log-odds ratio); fixed-effects meta-analysis standard error; effect allele frequency; fixed-effects meta-analysis association P-value...”
+So:
+PvalAssociation = MR-MEGA association test (the main one we want)
+Pval = fixed-effects meta-analysis p-value (secondary)
+
+
+
+4️⃣ Verify the parsed file
+zcat /home/siyaa/All_Metal_LDSC-CORR_Neff.v2.forSPx.tsv.gz | tail -n +2 | wc -l
+
+
+Expect millions of rows (not 208k).
+If you see very few, your metadata didn’t match the model.
+
+5️⃣ Run S-PrediXcan
+/usr/bin/python /usr/local/bin/MetaXcan_software/SPrediXcan.py \
+  --gwas_file /home/siyaa/All_Metal_LDSC-CORR_Neff.v2.forSPx.tsv.gz \
+  --snp_column panel_variant_id \
+  --effect_allele_column effect_allele \
+  --non_effect_allele_column non_effect_allele \
+  --beta_column effect_size \
+  --se_column standard_error \
+  --model_db_path /home/wheelerlab3/Data/predictdb_models/mashr/mashr_Adipose_Subcutaneous.db \
+  --covariance   /home/wheelerlab3/Data/predictdb_models/mashr/mashr_Adipose_Subcutaneous.txt.gz \
+  --model_db_snp_key varID \
+  --keep_non_rsid \
+  --additional_output \
+  --throw \
+  --output_file /home/siyaa/SPx_Adipose.tsv
+
+6️⃣ Check output sanity
+
+Look for:
+
+INFO - X % of model’s snps used
+
+
+You should now see 10–40 % instead of 0 %.
+That means your GWAS and model are successfully aligned
+
+
+
+
+-- for the 0% model snps used
+(base) siyaa@pop-os:~$ head -n 20 All_Metal_LDSC-CORR_Neff.v2_METAT2D_Adipose_Subcutaneous.tsv
+gene,gene_name,zscore,effect_size,pvalue,var_g,pred_perf_r2,pred_perf_pval,pred_perf_qval,n_snps_used,n_snps_in_cov,n_snps_in_model,best_gwas_p,largest_weight
+ENSG00000160305.17,DIP2A,5.473152160644531,0.1317305202036484,4.4210019283842103e-08,0.006268580630202135,NA,NA,NA,1,3,3,4.4210019283842103e-08,0.119941832580438
+ENSG00000147852.15,VLDLR,-5.204616461120567,-0.2152034281695176,1.94397680277361e-07,0.002710487304824393,NA,NA,NA,2,2,2,1.7460006192666106e-07,0.0784139057461713
+ENSG00000035115.21,SH3YL1,-4.768157750370706,-0.019311748624416855,1.8591818441866714e-06,0.26556858553083895,NA,NA,NA,2,2,2,3.725998977848452e-06,0.554209889471177
+ENSG00000129946.10,SHC2,4.329330753250713,0.017699216250223557,1.4956316200646262e-05,0.26873177934801,NA,NA,NA,5,7,7,3.5020006940645074e-05,0.45577578426443704
+ENSG00000267666.2,AC004156.3,-4.258394718170165,-0.05069006735321288,2.059001511446542e-05,0.0343598907221686,NA,NA,NA,1,1,1,2.059001511446537e-05,0.274215457303372
+ENSG00000177666.16,PNPLA2,4.258177757263183,0.34580705789257876,2.0610004078119154e-05,0.0006876702323967137,NA,NA,NA,1,2,2,2.061000407811908e-05,0.0396174678547358
+ENSG00000069696.6,DRD4,4.026111551878362,0.05032236159712313,5.6706794926824156e-05,0.032763323828452956,NA,NA,NA,3,4,4,1.6389998890346243e-05,0.41129275853721603
+ENSG00000189292.15,ALKAL2,-3.833758592605591,-0.1468444424923863,0.0001261999987540441,0.0034167440230813075,NA,NA,NA,1,1,1,0.0001261999987540441,0.0919340205925734
+ENSG00000101557.14,USP14,3.447922903830277,0.13240587023702027,0.0005649152619286721,0.002637255984989261,NA,NA,NA,2,2,2,0.001195999750655223,0.0798645367241458
+ENSG00000070404.9,FSTL3,-3.428690910339356,-0.18729546837369962,0.0006064998127352745,0.0019762507682469623,NA,NA,NA,1,1,1,0.0006064998127352745,0.0907656770749034
+ENSG00000281769.1,LINC01230,3.1836562335919742,0.018658048459722427,0.0014542760957592853,0.15634157496991516,NA,NA,NA,4,4,4,1.444003310361904e-18,0.61019550895709
+ENSG00000100568.10,VTI1B,3.083763599395752,0.528127497419055,0.002043999436421113,6.684598400894323e-05,NA,NA,NA,1,2,2,0.002043999436421113,0.0522601078998546
+ENSG00000099834.18,CDHR5,2.948519468307495,0.29854171351170183,0.0031930002773340217,0.0004677808415882264,NA,NA,NA,1,1,1,0.0031930002773340217,0.0341660797749799
+ENSG00000162998.4,FRZB,-2.882366895675659,-0.037114895966273834,0.003946998534590824,0.005131844604588545,NA,NA,NA,1,3,3,0.003946998534590824,0.23979590318904298
+ENSG00000175489.9,LRRC25,-2.811115980148315,-1.152996486175046,0.00493699860701891,0.0001592863788667204,NA,NA,NA,1,2,2,0.0049369986070189045,0.0701650013421792
+ENSG00000161328.10,LRRC56,-2.8013962360075406,-0.013353704444644288,0.005088200141464056,0.17552225693011375,NA,NA,NA,2,2,2,0.011379997746836575,0.5373289787010079
+ENSG00000023191.16,RNH1,2.7909719944000244,0.04336345011484938,0.005255001896764192,0.020318477481284358,NA,NA,NA,1,2,2,0.005255001896764192,0.31362818142883003
+ENSG00000178445.9,GLDC,-2.762595759270727,-0.044543298473928704,0.005734373795165112,0.017266684318551696,NA,NA,NA,2,2,2,0.003639000696896171,0.18533776226745002
+ENSG00000183186.7,C2CD4C,2.7515858301721754,0.018206514607620305,0.005930747589045348,0.13722440260057306,NA,NA,NA,3,3,3,0.010489996614174872,0.506134470841502
+(base) siyaa@pop-os:~$ wc -l All_Metal_LDSC-CORR_Neff.v2_METAT2D_Adipose_Subcutaneous.tsv
+160 All_Metal_LDSC-CORR_Neff.v2_METAT2D_Adipose_Subcutaneous.tsv
+
+
+if it prints 0 %, that means almost none of the SNPs in the tissue’s mashr model were found in your GWAS file.
