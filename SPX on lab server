@@ -147,3 +147,24 @@ line num : (base) siyaa@pop-os:~$ wc -l /home/siyaa/All_Metal_LDSC-CORR_Neff.v2.
 19821464 /home/siyaa/All_Metal_LDSC-CORR_Neff.v2.txt
 
 #raw file is huge. So the ~208k after parsing means the reference metadata you used filtered out ~99% of variants.
+
+
+
+
+######### okay so really, the issue was that the server was using a different genome reference builds. to fix this issue:
+
+added this to nano run_SPx.sh, because the issue was in the parsing step, not the actual spredixcan
+
+-liftover $DATA/liftover/hg19ToHg38.over.chain.gz \
+
+quick note summary for your future self
+
+why build differences matter
+- the S-PrediXcan models (mashr, elastic-net) are all built on the GRCh38 / hg38 reference genome.
+- if your GWAS summary stats use GRCh37 / hg19 coordinates, the chromosome–position IDs won’t align even though the SNPs are biologically the same.
+- result: the pipeline can’t match any SNPs → “0 % of model’s SNPs used”.
+how to identify a build mismatch
+- check model metadata:
+zcat /home/wheelerlab3/Data/predictdb_models/mashr/mashr_Adipose_Subcutaneous.txt.gz | head
+→ you’ll see IDs like chr1_12345_A_G_b38 (the _b38 tag = hg38).
+- check your GWAS positions or headers for “hg19” or “build 37”.
