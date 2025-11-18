@@ -1,0 +1,12 @@
+less ~/SPX_results_T2D_big_dataset/All_Metal_LDSC-CORR_Neff_2.v2_METAT2D_Adipose_Visceral_Omentum.tsv 
+# to see results. make sure you cd to correct directory
+
+(base) siyaa@pop-os:~/SPX_results_T2D_big_dataset$ conda activate ldsc #activates appropriate conda environment
+# refer to this link https://github.com/bulik/ldsc/wiki/Heritability-and-Genetic-Correlation 
+
+#what i did:
+
+You can download the required alleles file with the following command (or by manually following the download link if your machine does not have the wget utility):
+
+wget https://data.broadinstitute.org/alkesgroup/LDSCORE/w_hm3.snplist.bz2
+bunzip2 w_hm3.snplist.bz2
