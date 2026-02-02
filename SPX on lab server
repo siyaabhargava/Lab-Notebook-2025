@@ -168,3 +168,8 @@ how to identify a build mismatch
 zcat /home/wheelerlab3/Data/predictdb_models/mashr/mashr_Adipose_Subcutaneous.txt.gz | head
 → you’ll see IDs like chr1_12345_A_G_b38 (the _b38 tag = hg38).
 - check your GWAS positions or headers for “hg19” or “build 37”.
+
+
+### lsit all flags and args
+
+/usr/bin/python /usr/local/bin/MetaXcan_software/SPrediXcan.py -h
