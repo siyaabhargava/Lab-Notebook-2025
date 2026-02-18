@@ -107,3 +107,104 @@ Conversion finished at Thu Nov 20 20:22:22 2025
 Total time elapsed: 3.0m:28.73s
 (ldsc) siyaa@pop-os:~$ ls
 
+
+-----
+
+(base) siyaa@pop-os:~$ head -n 3 /home/siyaa/PCOS/PCOS_summary_data_19092018.txt
+MarkerName	Effect_allele	Other_allele	EAF	Effect	StdErr	Pvalue	TotalSampleSize
+X:2846021	a	g	.076	.54	.094	8.4e-09	14463.9
+8:11624416	c	g	.74	-.2	.037	5.3e-08	19916
+(base) siyaa@pop-os:~$ 
+
+
+(ldsc) siyaa@pop-os:~$ awk -F'\t' 'NR>1 {if($1=="NA") na++; else ok++} END{print "rsid NA:",na, "rsid present:",ok}' PCOS_summary_rsid_assigned.txt
+
+rsid NA: 9149372 rsid present: 145730
+
+
+filter and make file of only snps with assigned rsid's
+awk -F'\t' 'BEGIN{OFS="\t"}
+NR==1 {print; next}
+$1!="NA" &&
+$3 ~ /^[ACGTacgt]$/ &&
+$4 ~ /^[ACGTacgt]$/ {print}
+' PCOS_summary_rsid_assigned.txt > PCOS_summary_rsid_assigned_snps_only.txt
+
+
+
+(ldsc) siyaa@pop-os:~$ wc -l PCOS_summary_rsid_assigned.txt PCOS_summary_rsid_assigned_snps_only.txt
+  9295103 PCOS_summary_rsid_assigned.txt
+   145731 PCOS_summary_rsid_assigned_snps_only.txt
+  9440834 total
+
+
+cut -f1,3- PCOS_summary_rsid_assigned_snps_only.txt > PCOS_summary_rsid_assigned_snps_only_noMarkerName.txt
+
+
+
+PCOSSSsSSSSSSSSSs
+(ldsc) siyaa@pop-os:~$ ./munge_ldsc
+*********************************************************************
+* LD Score Regression (LDSC)
+* Version 1.0.1
+* (C) 2014-2019 Brendan Bulik-Sullivan and Hilary Finucane
+* Broad Institute of MIT and Harvard / MIT Department of Mathematics
+* GNU General Public License v3
+*********************************************************************
+Call: 
+./munge_sumstats.py \
+--out PCOS_rsid_summary_munged \
+--merge-alleles /home/wheelerlab3/bioi397/homeworks/HW5/ldscore_data/w_hm3.snplist \
+--frq EAF \
+--N-col TotalSampleSize \
+--a1 Effect_allele \
+--a2 Other_allele \
+--snp rsid \
+--sumstats /home/siyaa/PCOS_summary_rsid_assigned_snps_only_noMarkerName.txt \
+--p Pvalue 
+
+Interpreting column names as follows:
+TotalSampleSize:	Sample size
+Effect:	[linear/logistic] regression coefficient (0 --> no effect; above 0 --> A1 is trait/risk increasing)
+EAF:	Allele frequency
+rsid:	Variant ID (e.g., rs number)
+Effect_allele:	Allele 1, interpreted as ref allele for signed sumstat.
+Pvalue:	p-Value
+Other_allele:	Allele 2, interpreted as non-ref allele for signed sumstat.
+
+Reading list of SNPs for allele merge from /home/wheelerlab3/bioi397/homeworks/HW5/ldscore_data/w_hm3.snplist
+Read 1217311 SNPs for allele merge.
+Reading sumstats from /home/siyaa/PCOS_summary_rsid_assigned_snps_only_noMarkerName.txt into memory 5000000 SNPs at a time.
+. done
+Read 145730 SNPs from --sumstats file.
+Removed 131885 SNPs not in --merge-alleles.
+Removed 0 SNPs with missing values.
+Removed 0 SNPs with INFO <= 0.9.
+Removed 1 SNPs with MAF <= 0.01.
+Removed 0 SNPs with out-of-bounds p-values.
+Removed 584 variants that were not SNPs or were strand-ambiguous.
+13260 SNPs remain.
+Removed 0 SNPs with duplicated rs numbers (13260 SNPs remain).
+Removed 186 SNPs with N < 15253.3333333 (13074 SNPs remain).
+Median value of Effect was 0.0006, which seems sensible.
+Removed 863 SNPs whose alleles did not match --merge-alleles (12211 SNPs remain).
+Writing summary statistics for 1217311 SNPs (12211 with nonmissing beta) to PCOS_rsid_summary_munged.sumstats.gz.
+
+Metadata:
+Mean chi^2 = 1.104
+Lambda GC = 1.147
+Max chi^2 = 13.412
+0 Genome-wide significant SNPs (some may have been removed by filtering).
+
+Conversion finished at Wed Feb 18 09:54:04 2026
+Total time elapsed: 18.29s
+
+
+PCOS:
+rsid present: 145,730
+
+rsid NA: 9,149,372
+
+
+T2D  1217311 SNPs, 16012 Genome-wide significant SNPs
+PCOS  1217311 SNPs, 0 Genome-wide significant SNPs
